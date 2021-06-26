@@ -1,0 +1,6 @@
+*.iml
+*.pyc
+.idea
+__pycache__
+.venv
+lti_v3/

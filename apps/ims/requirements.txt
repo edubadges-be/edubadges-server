@@ -1,0 +1,4 @@
+social-auth-app-django==3.1.0
+lti==0.9.4
+git+https://github.com/edubadges/dgconfig@579ace7cc8595a610dced37ff9238e735509ab9e#egg=dgconfig
+bs4==0.0.1

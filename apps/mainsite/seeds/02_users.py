@@ -11,6 +11,9 @@ from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMA
 from staff.models import InstitutionStaff
 from .util import add_terms_institution
 
+password_hash = 'pbkdf2_sha256$180000$QaMwP84OlXVv$X9ST9xAYCYIzwAptzOE/Nc+5zZjxEiFsTFSRnh4Q++U='  # equals 'password'
+
+
 # Institution
 institutions = [
     {'name_english': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
@@ -82,7 +85,8 @@ no_perms = {
 
 def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
-                                              first_name=first_name, is_teacher=True, invited=True)
+                                              first_name=first_name, is_teacher=True, invited=True,
+                                              password=password_hash)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
@@ -96,7 +100,8 @@ def create_admin(username, email, first_name, last_name, institution_name, uid, 
 
 def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
-                                              first_name=first_name, is_teacher=True, invited=True)
+                                              first_name=first_name, is_teacher=True, invited=True,
+                                              password=password_hash)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
@@ -237,7 +242,8 @@ extra_data = json.dumps({"eduid": str(uuid.uuid4())})
 
 def create_student(username, first_name, last_name, email, uid):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, first_name=first_name,
-                                              last_name=last_name, validated_name=f"{first_name} {last_name}")
+                                              last_name=last_name, validated_name=f"{first_name} {last_name}",
+                                              password=password_hash)
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)

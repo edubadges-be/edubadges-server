@@ -46,11 +46,6 @@ rules==0.4
 # OAuth
 django-oauth-toolkit==1.1.2
 
-# AUTH
-djangorestframework-simplejwt==4.7.1
-password-strength==0.0.3.post2
-django-graphql-jwt==0.3.2
-
 # Some extras
 django-cors-headers==1.1.0
 django-cors-middleware==1.4.0

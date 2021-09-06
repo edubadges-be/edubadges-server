@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
@@ -157,29 +156,10 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/docs'
 
 AUTHENTICATION_BACKENDS = [
-#     'oauth2_provider.backends.OAuth2Backend',
-    'graphql_jwt.backends.JSONWebTokenBackend',
-    'authentication.backends.EmailModelBackend'
-#     # Needed to login by username in Django admin, regardless of `allauth`
-#     "badgeuser.backends.CachedModelBackend",
+    'oauth2_provider.backends.OAuth2Backend',
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "badgeuser.backends.CachedModelBackend",
 ]
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=31),
-    'TOKEN_REFRESH_LIFETIME': timedelta(days=62),
-}
-
-GRAPHQL_JWT = {
-    # gets the 'user_id' out of the json webtoken payload, needed to override
-    # because in JSONWebTokenMiddleware the standard is with key 'username'
-    'JWT_PAYLOAD_GET_USERNAME_HANDLER': (
-        lambda payload: payload.get('user_id')
-    ),
-    'JWT_GET_USER_BY_NATURAL_KEY_HANDLER': 'authentication.utils.get_user_by_natural_key',
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer'
-}
-
-
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
@@ -391,9 +371,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'mainsite.authentication.BadgrOAuth2Authentication',
-        # 'rest_framework.authentication.TokenAuthentication',
+        'mainsite.authentication.BadgrOAuth2Authentication',
+        'rest_framework.authentication.TokenAuthentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
     ),
@@ -521,8 +500,7 @@ AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information f
 SESSION_COOKIE_SAMESITE = None
 
 GRAPHENE = {
-    'SCHEMA': 'apps.mainsite.schema.schema',
-    'MIDDLEWARE': ['graphql_jwt.middleware.JSONWebTokenMiddleware']
+    'SCHEMA': 'apps.mainsite.schema.schema'
 }
 
 # Database

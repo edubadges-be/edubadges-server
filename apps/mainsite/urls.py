@@ -52,8 +52,6 @@ urlpatterns = [
     # REST Framework
     url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
-    path('auth/', include('authentication.urls')),  # password username login
-
     # v1 API endpoints
     url(r'^user/', include('badgeuser.api_urls')),
     url(r'^user/', include('badgrsocialauth.v1_api_urls')),

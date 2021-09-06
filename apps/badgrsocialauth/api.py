@@ -12,6 +12,7 @@ from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import OriginSetting
 from oauth2_provider.models import AccessToken
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 from rest_framework.views import APIView
@@ -88,3 +89,10 @@ class BadgrSocialAccountDetail(BaseEntityDetailView):
         social_account.delete()
 
         return Response(status=HTTP_204_NO_CONTENT)
+
+
+class SamlLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        return Response(request.headers)

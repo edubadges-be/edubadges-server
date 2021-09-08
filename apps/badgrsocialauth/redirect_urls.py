@@ -3,13 +3,13 @@ import importlib
 from allauth.socialaccount import providers
 from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, BadgrSocialAccountVerifyEmail, \
     BadgrSocialLoginCancel, BadgrAccountConnected, ImpersonateUser
-
+from badgrsocialauth.api import SamlLoginView
 from django.conf.urls import url
 
 urlpatterns = [
     url(r'^sociallogin', BadgrSocialLogin.as_view(permanent=False), name='socialaccount_login'),
 
-
+    url(r'^socialaccounts/samllogin$', SamlLoginView.as_view(), name='v1_api_saml_login'),
 
     # Intercept allauth cancel login view
     url(r'^cancellogin', BadgrSocialLoginCancel.as_view(permanent=False), name='socialaccount_login_cancelled'),

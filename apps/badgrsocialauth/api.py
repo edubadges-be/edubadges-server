@@ -175,7 +175,11 @@ class SamlLoginView(APIView):
             else:
                 social_account = SocialAccount.objects.create(provider='edu_id',
                                                               uid=edu_person_principal_name, user=user)
-                social_account.extra_data = json.dumps({"eduid": str(uuid.uuid4())})
+                social_account.extra_data = {"eduid": str(uuid.uuid4()),
+                                             'email': email,
+                                             'first_name': first_name,
+                                             'last_name': last_name
+                                             }
                 social_account.save()
                 StudentAffiliation.objects.create(user=user, schac_home=organisation, eppn=edu_person_principal_name)
                 user.remove_cached_data(['cached_affiliations'])

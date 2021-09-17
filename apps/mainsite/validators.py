@@ -29,13 +29,14 @@ class BadgeExtensionValidator(object):
     message = "Invalid OpenBadges Extension"
 
     def __call__(self, value):
-        if len(value) > 0:
-            result = openbadges.verifier.validate_extensions(value.copy())
-            report = result.get('report', {})
-            if not report.get('valid', False):
-                messages = report.get('messages', [])
-                if len(messages) > 0:
-                    msg = [message.get('result', self.message) for message in messages]
-                else:
-                    msg = self.message
-                raise ValidationError(msg)
+        # if len(value) > 0:
+        #     result = openbadges.verifier.validate_extensions(value.copy())
+        #     report = result.get('report', {})
+        #     if not report.get('valid', False):
+        #         messages = report.get('messages', [])
+        #         if len(messages) > 0:
+        #             msg = [message.get('result', self.message) for message in messages]
+        #         else:
+        #             msg = self.message
+        #         raise ValidationError(msg)
+        pass # TODO: reinstate the validator, fix the CORS issue

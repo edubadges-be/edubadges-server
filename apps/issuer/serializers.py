@@ -264,12 +264,13 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         return strip_tags(description)
 
     def validate_extensions(self, extensions):
-        if extensions:
-            for ext in extensions.values():
-                if "@context" in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
-                    raise BadgrValidationError(
-                        error_code=999,
-                        error_message=f"extensions @context invalid {ext['@context']}")
+        # TODO: reinstate this validation. Turned it off for POC purposes and time pressure
+        # if extensions:
+        #     for ext in extensions.values():
+        #         if "@context" in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
+        #             raise BadgrValidationError(
+        #                 error_code=999,
+        #                 error_message=f"extensions @context invalid {ext['@context']}")
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):

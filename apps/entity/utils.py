@@ -32,12 +32,15 @@ def validate_errors(serializer):
                     })
                 except TypeError as e:  # TODO: make this recursive for endless depth
                     sub_fields = {}
-                    for sub_attr, sub_errors in error.items():
-                        sub_fields[sub_attr] = []
-                        for sub_error in sub_errors:
-                            sub_fields[sub_attr].append({
-                                'error_code': get_form_error_code(vars(sub_error)['code']),
-                                'error_message': sub_error
-                            })
-                    fields[attr].append(sub_fields)
+                    if type(error) != str:
+                        for sub_attr, sub_errors in error.items():
+                            sub_fields[sub_attr] = []
+                            for sub_error in sub_errors:
+                                sub_fields[sub_attr].append({
+                                    'error_code': get_form_error_code(vars(sub_error)['code']),
+                                    'error_message': sub_error
+                                })
+                        fields[attr].append(sub_fields)
+                    else:
+                        serializer.is_valid(raise_exception=True)
         raise BadgrValidationError(error_message=fields, error_code=999)

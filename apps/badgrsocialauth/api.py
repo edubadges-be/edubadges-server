@@ -139,6 +139,15 @@ class SamlLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
+        """
+        This function logs a user in using his SAML credentials, it's purpose is to leave as much functionality intact
+        while making it possible to login with SAML. To make this happen in a short amount of time I mock some things, take
+        a few shortcuts with onboarding and accepting terms. So we can het the POC going in short notice.
+        - it uses the existing allauth function to log the user into the app
+        - it onboards the institition automatically, with empty terms and conditions
+        - it accepts all terms and conditions automatically for any user that logs in
+        - in case the user is a teacher it gives this person full authority for the entire institution
+        """
         validated_name = request.headers.get('Displayname-Saml2-String', None)
         first_name = request.headers.get('Givenname-Saml2-String', None)
         last_name = request.headers.get('Sn-Saml2-String', None)
@@ -149,8 +158,9 @@ class SamlLoginView(APIView):
         if not all([validated_name, first_name, last_name, affiliations,
                    edu_person_principal_name, email, organisation]):
             raise BadgrApiException400("Login attributes not complete, cannot log in", 999)
+        # TODO: if you're student AND teacher, you will be a teacher. You must be able to be both eventually
         is_teacher = 'staff' in affiliations or 'docent' in affiliations
-        institution = setup_institution(organisation)
+        institution = setup_institution(organisation)  # override the institution onboarding process for POC purposes
         try:
             user = BadgeUser.objects.get(username=edu_person_principal_name)
             social_account = user.get_social_account()
@@ -161,26 +171,28 @@ class SamlLoginView(APIView):
                                                       invited=True)
             EmailAddress.objects.create(verified=1, primary=1, email=email, user=user)
             if is_teacher:
-                social_account = SocialAccount.objects.create(provider='surf_conext',
+                social_account = SocialAccount.objects.create(provider='surf_conext',  # mock the surfconext AocialAccount object (for teachers)
                                                               uid=edu_person_principal_name, user=user)
                 user.institution = institution
                 user.save()
                 terms = user.institution.cached_terms()
-                for term in terms:
+                for term in terms:  # override all the terms acceptance for POC purposes
                     terms_agreement, _ = TermsAgreement.objects.get_or_create(user=user, terms=term)
                     terms_agreement.agreed_version = term.version
                     terms_agreement.agreed = True
                     terms_agreement.save()
+                # Give user automatically full permissions for the entire institution
                 InstitutionStaff.objects.create(institution=institution, user=user, **InstitutionStaff.full_permissions())
             else:
-                social_account = SocialAccount.objects.create(provider='edu_id',
+                social_account = SocialAccount.objects.create(provider='edu_id',  # mock the eduid AocialAccount object (for students)
                                                               uid=edu_person_principal_name, user=user)
-                social_account.extra_data = {"eduid": str(uuid.uuid4()),
+                social_account.extra_data = {"eduid": str(uuid.uuid4()),  # generate mock eduid
                                              'email': email,
                                              'first_name': first_name,
                                              'last_name': last_name
                                              }
                 social_account.save()
+                # affiliate student with his institution
                 StudentAffiliation.objects.create(user=user, schac_home=organisation, eppn=edu_person_principal_name)
                 user.remove_cached_data(['cached_affiliations'])
         sociallogin = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])
@@ -189,12 +201,13 @@ class SamlLoginView(APIView):
         if not badgr_app:
             badgr_app = BadgrApp.objects.all().first()
         set_session_badgr_app(self.request, badgr_app)
+        # Here I perform the allauth login
         ret = perform_login(self.request, sociallogin.user,
                       email_verification=app_settings.EMAIL_VERIFICATION,
                       redirect_url=sociallogin.get_redirect_url(self.request),
                       signal_kwargs={"sociallogin": sociallogin})
         role = 'teacher' if is_teacher else 'student'
-        print(ret.url + f'&role={role}')
-        return HttpResponseRedirect(ret.url + f'&role={role}')
+        print(ret.url + f'&role={role}')  # print the url for debug purposes (you can log in using a postman call and copying the url to your browser)
+        return HttpResponseRedirect(ret.url + f'&role={role}')  # set role to determine if you go to your backpack (students) or issuer portal (teachers)
 
 
